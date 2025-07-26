@@ -1,5 +1,26 @@
 #include <stdarg.h>
 
+void scroll_screen() {
+  volatile char *vidmem = (char *)0xb8000;
+
+  // Copy each row to the one above it
+  for (int row = 1; row < 25; row++) {
+    for (int col = 0; col < 80; col++) {
+      int src = (row * 80 + col) * 2;
+      int dst = ((row - 1) * 80 + col) * 2;
+      vidmem[dst] = vidmem[src];
+      vidmem[dst + 1] = vidmem[src + 1];
+    }
+  }
+
+  // Clear last row
+  for (int col = 0; col < 80; col++) {
+    int pos = ((25 - 1) * 80 + col) * 2;
+    vidmem[pos] = ' ';
+    vidmem[pos + 1] = 0x07;
+  }
+}
+
 void itoa(int value, char *str, int base) {
   char *digits = "0123456789ABCDEF";
   char buffer[32];
@@ -8,7 +29,7 @@ void itoa(int value, char *str, int base) {
 
   if (value == 0) {
     str[0] = '0';
-    str[1] = '\n';
+    str[1] = '\0';
     return;
   }
 
@@ -40,12 +61,25 @@ void kprint(const char *str) {
     if (*str == '\n') {
       row++;
       col = 0;
-      str++;
     } else {
       int pos = (row * 80 + col) * 2;
-      vidmem[pos] = *str++;
+      vidmem[pos] = *str;
       vidmem[pos + 1] = 0x07;
       col++;
+    }
+
+    str++;
+
+    // If we are past the right edge, wrap
+    if (col >= 80) {
+      col = 0;
+      row++;
+    }
+
+    // If we are past the bottom, scroll
+    if (row >= 25) {
+      scroll_screen();
+      row = 24;
     }
   }
 }
@@ -101,9 +135,9 @@ void clear_screen() {
 void kernel_main(void) {
   clear_screen();
 
-  kprintf("Hello, %s!\n", "Kerny");
-  kprintf("The answer is %d\n", 42);
-  kprintf("Hex test: %x\n", 48879);
+  for (int i = 0; i < 30; i++) {
+    kprintf("Line %d: Scrolling test!\n", i + 1);
+  }
 
   while (1) {
   }

@@ -1,2 +1,7 @@
-cross-compilation/
+# Build artifacts
+*.o
+*.bin
+*.iso
 
+# Cross compilation
+cross-compilation/
