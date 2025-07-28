@@ -1,25 +1,10 @@
 #include "framebuffer.h"
 #include "limine.h"
-
-__attribute__((used,
-               section(".limine_requests"))) volatile LIMINE_BASE_REVISION(3);
-
-__attribute__((used,
-               section(".limine_requests"))) struct limine_framebuffer_request
-    framebuffer_request = {.id = LIMINE_FRAMEBUFFER_REQUEST, .revision = 0};
-
-__attribute__((
-    used,
-    section(".limine_requests_start"))) volatile LIMINE_REQUESTS_START_MARKER;
-
-__attribute__((
-    used, section(".limine_requests_end"))) volatile LIMINE_REQUESTS_END_MARKER;
-
 #include <stdint.h>
 
 framebuffer_t fb;
 
-// extern struct limine_framebuffer_request framebuffer_request;
+extern struct limine_framebuffer_request framebuffer_request;
 
 void framebuffer_init(void) {
   if (framebuffer_request.response == NULL ||
@@ -30,7 +15,7 @@ void framebuffer_init(void) {
 
   struct limine_framebuffer *lfb =
       framebuffer_request.response->framebuffers[0];
-  fb.addr = (uint32_t *)(uintptr_t)lfb->address;
+  fb.addr = lfb->address;
   fb.width = lfb->width;
   fb.height = lfb->height;
   fb.pitch = lfb->pitch / 4;
@@ -53,17 +38,5 @@ void framebuffer_draw_rect(uint64_t x, uint64_t y, uint64_t w, uint64_t h,
         continue;
       fb.addr[yy * fb.pitch + xx] = color;
     }
-  }
-}
-
-// --- Entry point ---
-void _start(void) {
-  framebuffer_init();
-
-  framebuffer_clear(0x000000);                       // black
-  framebuffer_draw_rect(50, 50, 150, 100, 0x0000FF); // red (BGR)
-
-  for (;;) {
-    __asm__("hlt");
   }
 }

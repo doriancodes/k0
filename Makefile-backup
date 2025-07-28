@@ -8,7 +8,7 @@ CC        := $(PREFIX)/bin/$(TARGET)-gcc
 LD        := $(PREFIX)/bin/$(TARGET)-ld
 
 KERNEL    := k0.elf
-OBJS      := $(BUILD_DIR)/kernel.o $(BUILD_DIR)/libc.o 
+OBJS      := $(BUILD_DIR)/kernel.o $(BUILD_DIR)/libc.o $(BUILD_DIR)/framebuffer.o
 ISO       := k0.iso
 ISO_DIR   := iso_root
 
@@ -45,6 +45,9 @@ $(BUILD_DIR)/kernel.o: $(SRC_DIR)/kernel.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -I $(SRC_DIR) -c $< -o $@
 
 $(BUILD_DIR)/libc.o: $(SRC_DIR)/libc.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -I $(SRC_DIR) -c $< -o $@
+
+$(BUILD_DIR)/framebuffer.o: $(SRC_DIR)/framebuffer.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -I $(SRC_DIR) -c $< -o $@
 
 # === Link kernel ===
