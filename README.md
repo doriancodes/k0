@@ -1,6 +1,6 @@
-# Kerny — A Simple x86 Kernel
+# k0 — A Simple x86 Kernel
 
-This project is a minimal 32-bit kernel written in C and Assembly, booted using GRUB and tested in QEMU. It's designed for learning the low-level fundamentals of operating systems.
+This project is a minimal kernel written in C and Assembly, booted using limine and tested in QEMU. It's designed for learning the low-level fundamentals of operating systems.
 
 ---
 ## Requirements
