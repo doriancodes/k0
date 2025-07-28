@@ -4,6 +4,9 @@
 *.iso
 *.elf
 
+# Backup files
+*.bak
+
 # Cross compilation
 cross-compilation/
 

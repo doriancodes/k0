@@ -28,7 +28,7 @@ This will:
 
 ## Step 2: Build and run the kernel
 ```bash
-make         # Builds everything and produces kerny.iso
+make         # Builds everything and produces k0.iso
 make run     # Boots it in QEMU
 make clean   # Removes build artifacts (but keeps the toolchain)
 make clean-cross   # Removes everything including the cross-compiler

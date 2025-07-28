@@ -5,8 +5,8 @@ TARGET    := x86_64-elf
 CC        := $(PREFIX)/bin/$(TARGET)-gcc
 LD        := $(PREFIX)/bin/$(TARGET)-ld
 
-KERNEL    := kerny.elf
-ISO       := kerny.iso
+KERNEL    := k0.elf
+ISO       := k0.iso
 ISO_DIR   := iso_root
 
 CFLAGS    := -O2 -ffreestanding -Wall -Wextra -mno-red-zone -m64
