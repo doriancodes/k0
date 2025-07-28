@@ -1,4 +1,5 @@
 # === Paths ===
+SRC_DIR   := $(CURDIR)/src
 CROSS_DIR := $(CURDIR)/cross-compilation
 PREFIX    := $(CROSS_DIR)/cross-compiler
 TARGET    := x86_64-elf
@@ -35,8 +36,8 @@ $(LIMINE_BIN): | $(LIMINE_DIR)
 	$(MAKE) -C $(LIMINE_DIR)
 
 # === Build object files ===
-kernel.o: kernel.c
-	$(CC) $(CFLAGS) -c $< -o $@
+kernel.o: $(SRC_DIR)/kernel.c
+	$(CC) $(CFLAGS) -I $(SRC_DIR) -c $< -o $@
 
 # === Link kernel ===
 $(KERNEL): kernel.o
