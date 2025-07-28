@@ -1,5 +1,6 @@
 # === Paths ===
 SRC_DIR   := $(CURDIR)/src
+BUILD_DIR := $(CURDIR)/build
 CROSS_DIR := $(CURDIR)/cross-compilation
 PREFIX    := $(CROSS_DIR)/cross-compiler
 TARGET    := x86_64-elf
@@ -7,6 +8,7 @@ CC        := $(PREFIX)/bin/$(TARGET)-gcc
 LD        := $(PREFIX)/bin/$(TARGET)-ld
 
 KERNEL    := k0.elf
+OBJS      := $(BUILD_DIR)/kernel.o $(BUILD_DIR)/libc.o
 ISO       := k0.iso
 ISO_DIR   := iso_root
 
@@ -36,11 +38,17 @@ $(LIMINE_BIN): | $(LIMINE_DIR)
 	$(MAKE) -C $(LIMINE_DIR)
 
 # === Build object files ===
-kernel.o: $(SRC_DIR)/kernel.c
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+$(BUILD_DIR)/kernel.o: $(SRC_DIR)/kernel.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -I $(SRC_DIR) -c $< -o $@
+
+$(BUILD_DIR)/libc.o: $(SRC_DIR)/libc.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -I $(SRC_DIR) -c $< -o $@
 
 # === Link kernel ===
-$(KERNEL): kernel.o
+$(KERNEL): $(OBJS)
 	$(LD) $(LDFLAGS) -o $@ $^
 
 # === Build ISO ===
@@ -76,7 +84,7 @@ run: $(ISO)
 
 # === Cleanup ===
 clean:
-	rm -f *.o $(KERNEL)
+	rm -rf $(BUILD_DIR)
 	rm -rf $(ISO_DIR)
 	rm -f $(ISO)
 
