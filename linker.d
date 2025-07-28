@@ -1,11 +1,23 @@
-ENTRY(kernel_main)
+ENTRY(_start)
 
 SECTIONS {
-    . = 1M;
-    .text : {
-        *(.multiboot)
-        *(.text*)
-    }
-    .data : { *(.data*) }
-    .bss  : { *(.bss*)  }
+  . = 0xffffffff80000000;  /* Higher-half kernel base */
+
+  .text : {
+    *(.text*)
+  }
+
+  .rodata : {
+    *(.rodata*)
+  }
+
+  .data : {
+    *(.data*)
+  }
+
+  .bss : {
+    *(.bss*)
+    *(COMMON)
+  }
 }
+
