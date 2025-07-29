@@ -10,8 +10,5 @@
 # Cross compilation
 cross-compilation/
 
-# Limine
-limine/
-
 # iso root
-iso_root/
+iso/

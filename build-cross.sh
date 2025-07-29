@@ -7,7 +7,7 @@ SRC_DIR=$ROOT_DIR/src
 BUILD_BINUTILS=$ROOT_DIR/build-binutils
 BUILD_GCC=$ROOT_DIR/build-gcc
 PREFIX=$ROOT_DIR/cross-compiler
-TARGET=x86_64-elf
+TARGET=i686-elf
 PATH="$PREFIX/bin:$PATH"
 
 # === Dependencies Check (Fedora example) ===

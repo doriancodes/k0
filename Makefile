@@ -3,39 +3,25 @@ SRC_DIR   := $(CURDIR)/src
 BUILD_DIR := $(CURDIR)/build
 CROSS_DIR := $(CURDIR)/cross-compilation
 PREFIX    := $(CROSS_DIR)/cross-compiler
-TARGET    := x86_64-elf
+
+# === Toolchain ===
+TARGET    := i686-elf
 CC        := $(PREFIX)/bin/$(TARGET)-gcc
 LD        := $(PREFIX)/bin/$(TARGET)-ld
 
-KERNEL    := k0.elf
-OBJS      := $(BUILD_DIR)/kernel.o $(BUILD_DIR)/libc.o
-ISO       := k0.iso
-ISO_DIR   := iso_root
+# === Flags ===
+CFLAGS = -ffreestanding -O2 -Wall -Wextra
+LDFLAGS = -T linker.d -nostdlib
 
-CFLAGS    := -O2 -ffreestanding -Wall -Wextra -mno-red-zone -m64
-LDFLAGS   := -nostdlib -T linker.d
+# === Files ===
+SRC_C = src/kernel.c
+SRC_S = src/boot.s
+OBJ = $(BUILD_DIR)/kernel.o $(BUILD_DIR)/boot.o
+ISO = k0.iso
+ELF = k0.elf
 
-# === Local Limine paths ===
-LIMINE_DIR      := $(CURDIR)/limine
-LIMINE_BIN      := $(LIMINE_DIR)/limine
-LIMINE_SYS      := $(LIMINE_DIR)/limine-bios.sys
-LIMINE_CD       := $(LIMINE_DIR)/limine-bios-cd.bin
-LIMINE_EFI      := $(LIMINE_DIR)/limine-uefi-cd.bin
-LIMINE_EFI64    := $(LIMINE_DIR)/BOOTX64.EFI
-LIMINE_EFI32    := $(LIMINE_DIR)/BOOTIA32.EFI
-LIMINE_CONF     := limine.conf
-LIMINE_BOOT_DIR := $(ISO_DIR)/boot/limine
-
+# === Default Target ===
 all: $(ISO)
-
-# === Setup limine bootloader ===
-# Only clone Limine if not present
-$(LIMINE_DIR):
-	git clone https://github.com/limine-bootloader/limine.git --branch=v9.x-binary --depth=1 $(LIMINE_DIR)
-
-# Only build Limine if binary does not exist
-$(LIMINE_BIN): | $(LIMINE_DIR)
-	$(MAKE) -C $(LIMINE_DIR)
 
 # === Build object files ===
 $(BUILD_DIR):
@@ -44,52 +30,26 @@ $(BUILD_DIR):
 $(BUILD_DIR)/kernel.o: $(SRC_DIR)/kernel.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -I $(SRC_DIR) -c $< -o $@
 
-$(BUILD_DIR)/libc.o: $(SRC_DIR)/libc.c | $(BUILD_DIR)
+$(BUILD_DIR)/boot.o: $(SRC_DIR)/boot.s | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -I $(SRC_DIR) -c $< -o $@
 
-# === Link kernel ===
-$(KERNEL): $(OBJS)
+# === Link ELF ===
+$(ELF): $(OBJ)
 	$(LD) $(LDFLAGS) -o $@ $^
 
 # === Build ISO ===
-$(ISO): $(KERNEL) $(LIMINE_CONF) $(LIMINE_BIN)
-	# Create a directory which will be our ISO root.
-	mkdir -p $(ISO_DIR)/boot
+$(ISO): $(ELF)
+	mkdir -p iso/boot/grub
+	cp $< iso/boot/
+	cp grub/grub.cfg iso/boot/grub/
+	grub2-mkrescue -o $@ iso
 
-	# Copy the relevant files over.
-	cp -v $(KERNEL) $(ISO_DIR)/boot/
-	mkdir -p $(LIMINE_BOOT_DIR)
-	cp -v $(LIMINE_CONF) $(LIMINE_SYS) $(LIMINE_CD) $(LIMINE_EFI) $(LIMINE_BOOT_DIR)/
-
-	# Create the EFI boot tree and copy Limine's EFI executables over.
-	mkdir -p $(ISO_DIR)/EFI/BOOT
-	cp -v $(LIMINE_EFI64) $(ISO_DIR)/EFI/BOOT/
-	cp -v $(LIMINE_EFI32) $(ISO_DIR)/EFI/BOOT/
-
-	# Create the bootable ISO.
-	xorriso -as mkisofs -R -r -J \
-		-b boot/limine/$(notdir $(LIMINE_CD)) \
-		-no-emul-boot -boot-load-size 4 -boot-info-table -hfsplus \
-		-apm-block-size 2048 \
-		--efi-boot boot/limine/$(notdir $(LIMINE_EFI)) \
-		-efi-boot-part --efi-boot-image --protective-msdos-label \
-		$(ISO_DIR) -o $(ISO)
-
-	# Install Limine stage 1 and 2 for legacy BIOS boot.
-	$(LIMINE_BIN) bios-install $(ISO)
-
-# === Run with QEMU (UEFI)
+# === Run QEMU ===
 run: $(ISO)
-	qemu-system-x86_64 -cdrom $(ISO) -bios /usr/share/OVMF/OVMF_CODE.fd
+	qemu-system-i386 -cdrom $(ISO)
 
-# === Cleanup ===
+# === Clean ===
 clean:
-	rm -rf $(BUILD_DIR)
-	rm -rf $(ISO_DIR)
-	rm -f $(ISO)
+	rm -rf build iso *.elf *.iso
 
-clean-cross: clean
-	rm -rf $(CROSS_DIR)
-
-.PHONY: all clean run clean-cross
-
+.PHONY: all clean run

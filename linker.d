@@ -1,9 +1,10 @@
 ENTRY(_start)
 
 SECTIONS {
-  . = 0xffffffff80000000;  /* Higher-half kernel base */
+  . = 0x100000;
 
   .text : {
+    *(.multiboot)
     *(.text*)
   }
 
@@ -20,4 +21,3 @@ SECTIONS {
     *(COMMON)
   }
 }
-
