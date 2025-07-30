@@ -1,10 +1,8 @@
-#include "vga.h"
+#include "idt.h"
 
 // --- Entry point ---
 void kernel_main(void) {
-  vga_init();
-  vga_puts("Hello from VGA text mode!\n");
-  vga_puts("This is your kernel speaking\n");
+  idt_init();
 
   for (;;) {
     __asm__("hlt");

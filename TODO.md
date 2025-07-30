@@ -14,9 +14,9 @@
 
  - Call kernel C function (done)
 
- - VGA text mode output (putchar, puts, etc.)
+ - VGA text mode output (putchar, puts, etc.) (done)
 
- - IDT + ISRs (division by zero handler, etc.)
+ - IDT + ISRs (division by zero handler, etc.) (done)
 
  - IRQs + timer + keyboard
 
