@@ -14,9 +14,11 @@ CFLAGS = -ffreestanding -O2 -Wall -Wextra
 LDFLAGS = -T linker.d -nostdlib
 
 # === Files ===
-SRC_C = src/kernel.c
-SRC_S = src/boot.s
-OBJ = $(BUILD_DIR)/kernel.o $(BUILD_DIR)/boot.o
+SRC_C = $(SRC_DIR)/kernel.c $(SRC_DIR)/vga.c
+SRC_S = $(SRC_DIR)/boot.s
+OBJ_C = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRC_C))
+OBJ_S = $(patsubst $(SRC_DIR)/%.s, $(BUILD_DIR)/%.o, $(SRC_S))
+OBJ = $(OBJ_C) $(OBJ_S)
 ISO = k0.iso
 ELF = k0.elf
 
@@ -27,10 +29,10 @@ all: $(ISO)
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-$(BUILD_DIR)/kernel.o: $(SRC_DIR)/kernel.c | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -I $(SRC_DIR) -c $< -o $@
 
-$(BUILD_DIR)/boot.o: $(SRC_DIR)/boot.s | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.s | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -I $(SRC_DIR) -c $< -o $@
 
 # === Link ELF ===

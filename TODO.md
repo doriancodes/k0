@@ -6,3 +6,24 @@
 4. Framebuffer init   → Get pixels, maybe via VBE or UEFI GOP
 5. Terminal layer     → Write text into framebuffer
 6. Windowing system   → Later, after multitasking and memory mgmt
+
+
+ - GDT (done)
+
+ - Switch to protected mode (done)
+
+ - Call kernel C function (done)
+
+ - VGA text mode output (putchar, puts, etc.)
+
+ - IDT + ISRs (division by zero handler, etc.)
+
+ - IRQs + timer + keyboard
+
+ - Basic memory management (paging, malloc-like allocator)
+
+ - Optional: Framebuffer for graphics
+
+ - Filesystem support (read files from initrd or ATA)
+
+ - User-space and syscalls (microkernel-style)
