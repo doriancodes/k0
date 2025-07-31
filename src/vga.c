@@ -47,3 +47,11 @@ void vga_puts(const char *str) {
     vga_putc(*str++);
   }
 }
+
+void vga_puthex(uint32_t num) {
+  char hex[] = "0123456789ABCDEF";
+  vga_puts("0x");
+  for (int i = 28; i >= 0; i -= 4) {
+    vga_putc(hex[(num >> i) & 0xF]);
+  }
+}

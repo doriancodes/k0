@@ -9,7 +9,7 @@ static struct idt_ptr idtp;
 
 extern void isr0(); // From isr.s
 
-static void idt_set_gate(int num, uint32_t base, uint16_t sel, uint8_t flags) {
+void idt_set_gate(int num, uint32_t base, uint16_t sel, uint8_t flags) {
   idt[num].offset_low = base & 0xFFFF;
   idt[num].selector = sel;
   idt[num].zero = 0;

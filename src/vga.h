@@ -5,3 +5,4 @@ void vga_init(void);
 void vga_clear(void);
 void vga_putc(char c);
 void vga_puts(const char *str);
+void vga_puthex(uint32_t num);
