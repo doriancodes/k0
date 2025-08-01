@@ -14,8 +14,8 @@ CFLAGS = -ffreestanding -O2 -Wall -Wextra
 LDFLAGS = -T linker.d -nostdlib
 
 # === Files ===
-SRC_C = $(SRC_DIR)/kernel.c $(SRC_DIR)/vga.c $(SRC_DIR)/idt.c $(SRC_DIR)/irq.c $(SRC_DIR)/pic.c
-SRC_S = $(SRC_DIR)/boot.s $(SRC_DIR)/isr.s $(SRC_DIR)/irq_stubs.s 
+SRC_C = $(SRC_DIR)/kernel.c $(SRC_DIR)/common.c $(SRC_DIR)/monitor.c $(SRC_DIR)/isr.c $(SRC_DIR)/descriptor_tables.c
+SRC_S = $(SRC_DIR)/boot.s 
 OBJ_C = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRC_C))
 OBJ_S = $(patsubst $(SRC_DIR)/%.s, $(BUILD_DIR)/%.o, $(SRC_S))
 OBJ = $(OBJ_C) $(OBJ_S)

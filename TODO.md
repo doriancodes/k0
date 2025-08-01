@@ -27,3 +27,33 @@
  - Filesystem support (read files from initrd or ATA)
 
  - User-space and syscalls (microkernel-style)
+
+ 
+[Keyboard] 
+   |
+   | IRQ1
+   v
+[ PIC ]  -- Remapped to INT 33 -->  [ IDT[33] = address of keyboard_interrupt ]
+                                         |
+                                         v
+                             [ keyboard_interrupt (in ASM) ]
+                                         |
+                                         v
+                             [ keyboard_handler() in C ]
+
+
+
+[ Keyboard ] 
+     |
+     | IRQ1  (Hardware)
+     v
+[ PIC remapped IRQ1 → INT 33 ]
+     |
+     v
+[ CPU receives INT 33 ]
+     |
+     v
+[ IDT[33] → address of your handler ]
+     |
+     v
+[ Runs keyboard_interrupt → keyboard_handler() ]
