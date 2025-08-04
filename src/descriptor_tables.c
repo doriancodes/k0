@@ -7,6 +7,7 @@
 
 #include "common.h"
 #include "descriptor_tables.h"
+#include "serial.h"
 
 // Lets us access our ASM functions from our C code.
 extern void gdt_flush(u32int);
@@ -32,6 +33,7 @@ void init_descriptor_tables() {
 }
 
 static void init_gdt() {
+  serial_write("Initialise GDT\n");
   gdt_ptr.limit = (sizeof(gdt_entry_t) * 5) - 1;
   gdt_ptr.base = (u32int)&gdt_entries;
 
@@ -41,12 +43,16 @@ static void init_gdt() {
   gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); // User mode code segment
   gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // User mode data segment
 
+  serial_write("GDT flush\n");
   gdt_flush((u32int)&gdt_ptr);
 }
 
 // Set the value of one GDT entry.
 static void gdt_set_gate(s32int num, u32int base, u32int limit, u8int access,
                          u8int gran) {
+  serial_write("gdt set gate\n");
+  serial_write_dec(num);
+  serial_write("\n");
   gdt_entries[num].base_low = (base & 0xFFFF);
   gdt_entries[num].base_middle = (base >> 16) & 0xFF;
   gdt_entries[num].base_high = (base >> 24) & 0xFF;
@@ -59,6 +65,9 @@ static void gdt_set_gate(s32int num, u32int base, u32int limit, u8int access,
 }
 
 static void idt_set_gate(u8int num, u32int base, u16int sel, u8int flags) {
+  serial_write("idt set gate\n");
+  serial_write_dec(num);
+  serial_write("\n");
   idt_entries[num].base_lo = base & 0xFFFF;
   idt_entries[num].base_hi = (base >> 16) & 0xFFFF;
 
@@ -70,6 +79,7 @@ static void idt_set_gate(u8int num, u32int base, u16int sel, u8int flags) {
 }
 
 static void init_idt() {
+  serial_write("Initialise IDT\n");
   idt_ptr.limit = sizeof(idt_entry_t) * 256 - 1;
   idt_ptr.base = (u32int)&idt_entries;
 
@@ -80,5 +90,23 @@ static void init_idt() {
     extern void *isr_table[]; // Add this at the top of the file
     idt_set_gate(i, (u32int)isr_table[i], 0x08, 0x8E);
   }
+  serial_write("IDT flush\n");
   idt_flush((u32int)&idt_ptr);
+
+  // Remap the IRQs
+  outb(0x20, 0x11);
+  outb(0xA0, 0x11);
+  outb(0x21, 0x20); // Master PIC vector offset = 0x20 (32)
+  outb(0xA1, 0x28); // Slave PIC vector offset = 0x28 (40)
+  outb(0x21, 0x04); // Tell Master PIC there is a slave PIC at IRQ2 (0000 0100)
+  outb(0xA1, 0x02); // Tell Slave PIC its cascade identity (0000 0010)
+  outb(0x21, 0x01); // Set 8086/88 mode
+  outb(0xA1, 0x01); // Set 8086/88 mode
+  outb(0x21, 0x0);  // Clear masks
+  outb(0xA1, 0x0);  // Clear masks
+  // IRQs (32–47)
+  for (int i = 32; i <= 47; i++) {
+    extern void *irq_table[]; // You'll need to define this
+    idt_set_gate(i, (u32int)irq_table[i - 32], 0x08, 0x8E);
+  }
 }
